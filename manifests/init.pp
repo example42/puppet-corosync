@@ -94,6 +94,24 @@ class corosync (
     }
   }
 
+  if $::osfamily == 'Debian' {
+    $exec_command = $corosync::manage_service_enable ? {
+      true  => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
+      false => 'sed -i s/START=yes/START=no/ /etc/default/corosync',
+    }
+    $exec_unless = $corosync::manage_service_enable ? {
+      true  => 'grep START=yes /etc/default/corosync',
+      false => 'grep START=no /etc/default/corosync',
+    }
+    exec { 'enable_corosync_service':
+      command => $exec_command,
+      path    => [ '/bin', '/usr/bin' ],
+      unless  => $exec_unless,
+      require => Package[$corosync::package_name],
+      before  => Service[$corosync::service_name],
+    }
+  }
+
   if $corosync::config_file_path {
     file { 'corosync.conf':
       ensure  => $corosync::config_file_ensure,
