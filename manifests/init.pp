@@ -153,7 +153,7 @@ class corosync (
   if $corosync::monitor_class {
     class { $corosync::monitor_class:
       options_hash => $corosync::monitor_options_hash,
-      scope_hash   => {}, # TODO: Find a good way to inject class' scope
+      scope_hash   => {}, # TODO: Find a good way to inject class' scope
     }
   }
 
