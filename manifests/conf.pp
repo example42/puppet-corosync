@@ -70,7 +70,7 @@ define corosync::conf (
   include corosync
 
   $manage_path    = pickx($path, "${corosync::config_dir_path}/${name}")
-  $manage_content = choose_default($content, $template)
+  $manage_content = default_content($content, $template)
   $manage_mode    = pickx($mode, $corosync::config_file_mode)
   $manage_owner   = pickx($owner, $corosync::config_file_owner)
   $manage_group   = pickx($group, $corosync::config_file_group)
