@@ -36,11 +36,22 @@
 #   name like the  the name of the title a custom template to use as content of configfile
 #   If defined, configfile file has: content => content("$template")
 #
-# [*mode*] [*owner*] [*group*] [*notify*] [*require*] [*replace*]
+# [*mode*]
+# [*owner*]
+# [*group*]
+# [*config_file_require*]
+# [*replace*]
 #   String. Optional. Default: undef
 #   All these parameters map directly to the created file attributes.
 #   If not defined the module's defaults are used.
 #   If defined, config file file has, for example: mode => $mode
+#
+# [*config_file_notify*]
+#   String. Optional. Default: 'class_default'
+#   Defines the notify argument of the created file.
+#   The default special value implies the same behaviour of the main class
+#   configuration file. Set to undef to remove any notify, or set
+#   the name(s) of the resources to notify
 #
 # [*options_hash*]
 #   Hash. Default undef. Needs: 'template'.
@@ -57,9 +68,9 @@ define corosync::conf (
   $mode         = undef,
   $owner        = undef,
   $group        = undef,
-  $notify       = undef,
-  $require      = undef,
-  $replace      = undef,
+
+  $config_file_notify  = 'class_default',
+  $config_file_require = undef,
 
   $options_hash = undef,
 
@@ -74,9 +85,11 @@ define corosync::conf (
   $manage_mode    = pickx($mode, $corosync::config_file_mode)
   $manage_owner   = pickx($owner, $corosync::config_file_owner)
   $manage_group   = pickx($group, $corosync::config_file_group)
-  $manage_require = pickx($require, $corosync::config_file_require)
-  $manage_notify  = pickx($notify, $corosync::manage_config_file_notify)
-  $manage_replace = pickx($replace, $corosync::config_file_replace)
+  $manage_require = pickx($config_file_require, $corosync::config_file_require)
+  $manage_notify  = $config_file_notify ? {
+    'class_default' => $corosync::manage_config_file_notify,
+    default         => $config_file_notify,
+  }
 
   file { "corosync_conf_${name}":
     ensure  => $ensure,
@@ -88,7 +101,6 @@ define corosync::conf (
     group   => $manage_group,
     require => $manage_require,
     notify  => $manage_notify,
-    replace => $manage_replace,
   }
 
 }
